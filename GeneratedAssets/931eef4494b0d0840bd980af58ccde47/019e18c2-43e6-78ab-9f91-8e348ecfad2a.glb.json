@@ -1,0 +1,23 @@
+{
+    "asset": "931eef4494b0d0840bd980af58ccde47",
+    "fileName": "019e18c2-43e6-78ab-9f91-8e348ecfad2a.glb",
+    "prompt": "A detailed 3D model of a WWII fighter plane, specifically a P-51 Mustang. High quality, realistic textures. Use the provided image as the front view reference.",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "651ed0c5a5a335a4f898474e2f44888e",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

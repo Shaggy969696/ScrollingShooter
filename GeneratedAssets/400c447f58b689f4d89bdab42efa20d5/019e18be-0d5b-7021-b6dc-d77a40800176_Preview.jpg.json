@@ -1,0 +1,12 @@
+{
+    "asset": "400c447f58b689f4d89bdab42efa20d5",
+    "fileName": "019e18be-0d5b-7021-b6dc-d77a40800176_Preview.jpg",
+    "prompt": "Seamless hand-painted ocean water texture, stylized, vibrant blue with gentle waves, tileable.",
+    "negativePrompt": "",
+    "model": "hand-painted-textures-2-0",
+    "modelName": "Hand Painted Textures 2.0",
+    "customSeed": 1790678477,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation"
+}
