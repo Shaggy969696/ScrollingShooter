@@ -64,12 +64,13 @@ public abstract class Projectile : MonoBehaviour
             Destroy(gameObject);  // fallback si se usa sin pool (no recomendado)
     }
 
-    // Al entrar en un trigger: aplica daño si el target implementa IDamageable
-    // Proyectiles físicos usan Trigger (no Physics collision)
-    // Setup requerido: Collider del proyectil en IsTrigger = true
+    // Al entrar en un trigger: aplica daño si el target implementa IDamageable.
+    // GetComponentInParent: sube por la jerarquía hasta encontrar IDamageable,
+    // necesario cuando el Collider está en un hijo (Model) y el script en el root.
     protected virtual void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<IDamageable>(out var target))
+        IDamageable target = other.GetComponentInParent<IDamageable>();
+        if (target != null)
         {
             target.TakeDamage(damage);
             ReturnToPool();

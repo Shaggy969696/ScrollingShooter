@@ -65,8 +65,10 @@ public class LaserWeapon : Weapon
 
         foreach (var hit in hits)
         {
-            // TryGetComponent es null-safe: si el collider tiene IDamageable, aplica daño
-            if (hit.collider.TryGetComponent<IDamageable>(out var target))
+            // GetComponentInParent: sube por la jerarquía del collider golpeado
+            // hasta encontrar IDamageable en el root del prefab enemigo.
+            IDamageable target = hit.collider.GetComponentInParent<IDamageable>();
+            if (target != null)
             {
                 Debug.Log($"[LaserWeapon] Daño aplicado a: {hit.collider.gameObject.name}");
                 target.TakeDamage(damage);
