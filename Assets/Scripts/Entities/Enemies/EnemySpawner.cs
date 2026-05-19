@@ -50,6 +50,15 @@ public class EnemySpawner : MonoBehaviour
     private readonly System.Predicate<ShooterEnemy> isInactive =
         s => s == null || !s.gameObject.activeSelf;
 
+    // ── Swooper Enemy ──────────────────────────────────────────────────────────
+    [Header("Swooper Enemy")]
+    [Tooltip("Transform del player para usar su X como origen de la S")]
+    [SerializeField] private Transform playerTransform;
+
+    [Tooltip("Fracción del halfWidth que limita cuánto puede desviarse el spawn del borde (seguridad)")]
+    [Range(0f, 1f)]
+    [SerializeField] private float swooperMaxXFactor = 0.85f;
+
     // ── API pública ───────────────────────────────────────────────────────────
 
     // Spawnea un ShooterEnemy en la columna X (local a EnemiesSetter) indicada.
@@ -80,7 +89,7 @@ public class EnemySpawner : MonoBehaviour
         activeShooters.Add(shooter);
     }
 
-    // Spawnea un SwooperEnemy con dirección de C aleatoria.
+    // Spawnea un SwooperEnemy con X de entrada aleatorio dentro del área de juego.
     public void SpawnSwooper()
     {
         if (swooperPool == null) { Debug.LogError("[EnemySpawner] swooperPool no asignado."); return; }
@@ -95,8 +104,15 @@ public class EnemySpawner : MonoBehaviour
 
         swooper.Initialize(swooperPool);
 
+        // Usa el X actual del player, clampado para que la S no salga del área
+        float playerX = playerTransform != null
+            ? Mathf.Clamp(playerTransform.position.x,
+                          transform.position.x - halfWidth * swooperMaxXFactor,
+                          transform.position.x + halfWidth * swooperMaxXFactor)
+            : transform.position.x;
+
         bool    goRight    = Random.value > 0.5f;
-        Vector3 spawnWorld = transform.position + new Vector3(0f, 0f,  halfHeight + spawnMargin);
+        Vector3 spawnWorld = new Vector3(playerX, transform.position.y, transform.position.z + halfHeight + spawnMargin);
         float   exitZ      = transform.position.z - halfHeight - spawnMargin;
 
         swooper.BeginSwoop(spawnWorld, exitZ, goRight);

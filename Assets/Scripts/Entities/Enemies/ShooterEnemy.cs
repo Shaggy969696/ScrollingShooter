@@ -1,19 +1,7 @@
 // ============================================================
 // ShooterEnemy.cs
-// Enemigo estático: entra desde Z+, se detiene cerca del borde
-// superior y dispara proyectiles hasta ser destruido o retirado.
-//
-// Estados:
-//   Idle       → esperando activación (estado de pool)
-//   Entering   → avanzando desde spawn hasta stopAtZ
-//   Shooting   → estático, dispara a intervalos
-//   Retreating → retrocede hacia Z+ y vuelve al pool
-//
-// Prefab setup:
-//   [ShooterEnemy]  ← ShooterEnemy.cs  |  Layer: Enemy  |  Tag: Enemy
-//     ├─ Model      ← Renderer
-//     ├─ HitBox     ← BoxCollider, isTrigger=FALSE, Layer: Enemy
-//     └─ FirePoint  ← Transform vacío, apunta hacia -Z (hacia el player)
+// MODIFICADO: Shoot() ahora obtiene un proyectil del pool enemigo
+// y lo lanza desde el firePoint hacia el player (-Z).
 // ============================================================
 
 using UnityEngine;
@@ -31,7 +19,16 @@ public class ShooterEnemy : Enemy
     [Tooltip("Segundos entre disparos")]
     [SerializeField] private float fireInterval = 1.5f;
 
-    [Tooltip("Punto de origen del disparo (asignado desde el prefab)")]
+    [Tooltip("Daño que inflige cada proyectil al player")]
+    [SerializeField] private float projectileDamage = 10f;
+
+    [Tooltip("Velocidad de los proyectiles disparados")]
+    [SerializeField] private float projectileSpeed = 20f;
+
+    [Tooltip("Pool de proyectiles enemigos (prefab con layer EnemyProjectile)")]
+    [SerializeField] private ProjectilePool projectilePool;
+
+    [Tooltip("Punto de origen del disparo — debe apuntar hacia -Z en world space")]
     [SerializeField] private Transform firePoint;
 
     // ── Estado interno ────────────────────────────────────────────────────────
@@ -39,36 +36,32 @@ public class ShooterEnemy : Enemy
     private enum State { Idle, Entering, Shooting, Retreating }
     private State state = State.Idle;
 
-    private float stopAtZ;    // Z donde se detiene (topBorderZ - distanceFromTopBorder)
-    private float retreatToZ; // Z de salida (igual que el Z de spawn)
+    private float stopAtZ;
+    private float retreatToZ;
     private float fireTimer;
 
-    // ── API pública (llamada por EnemySpawner) ────────────────────────────────
+    // ── API pública ───────────────────────────────────────────────────────────
 
-    // Inicia la entrada del enemigo.
-    //   spawnPos   : posición de aparición fuera del área (Z > topBorderZ)
-    //   topBorderZ : coordenada Z del borde superior del espacio de juego
     public void BeginEntry(Vector3 spawnPos, float topBorderZ)
     {
         transform.position = spawnPos;
-        stopAtZ = topBorderZ - distanceFromTopBorder;
-        retreatToZ = spawnPos.z; // se retira al mismo Z desde donde entró
-        state = State.Entering;
-        fireTimer = fireInterval;
+        stopAtZ    = topBorderZ - distanceFromTopBorder;
+        retreatToZ = spawnPos.z;
+        state      = State.Entering;
+        // fireTimer se resetea al llegar a stopAtZ, en UpdateEntering()
     }
 
-    // Ordena la retirada. Llamado por EnemySpawner para limpiar la oleada.
     public void Retreat()
     {
         if (state == State.Entering || state == State.Shooting)
             state = State.Retreating;
     }
 
-    // ── Hook de Enemy ─────────────────────────────────────────────────────────
+    // ── Hooks ─────────────────────────────────────────────────────────────────
 
     protected override void OnSpawn()
     {
-        state = State.Idle;
+        state     = State.Idle;
         fireTimer = 0f;
     }
 
@@ -78,13 +71,13 @@ public class ShooterEnemy : Enemy
     {
         switch (state)
         {
-            case State.Entering: UpdateEntering(); break;
-            case State.Shooting: UpdateShooting(); break;
+            case State.Entering:   UpdateEntering();   break;
+            case State.Shooting:   UpdateShooting();   break;
             case State.Retreating: UpdateRetreating(); break;
         }
     }
 
-    // ── Máquina de estados ────────────────────────────────────────────────────
+    // ── Estados ───────────────────────────────────────────────────────────────
 
     private void UpdateEntering()
     {
@@ -93,7 +86,8 @@ public class ShooterEnemy : Enemy
 
         if (Mathf.Abs(transform.position.z - stopAtZ) < 0.05f)
         {
-            transform.position = target; // snap exacto
+            transform.position = target;
+            fireTimer = fireInterval; // ← resetea aquí, no en BeginEntry
             state = State.Shooting;
         }
     }
@@ -119,8 +113,18 @@ public class ShooterEnemy : Enemy
 
     private void Shoot()
     {
-        // TODO: obtener proyectil del pool de proyectiles enemigos y lanzarlo
-        string origin = firePoint != null ? firePoint.position.ToString("F1") : transform.position.ToString("F1");
-        Debug.Log($"[ShooterEnemy] {gameObject.name} disparó desde {origin}");
+        if (projectilePool == null)
+        {
+            Debug.LogWarning($"[ShooterEnemy] {gameObject.name}: projectilePool no asignado.");
+            return;
+        }
+
+        Transform origin = firePoint != null ? firePoint : transform;
+
+        Projectile p = projectilePool.GetProjectile();
+        p.transform.position = origin.position;
+        p.transform.rotation = origin.rotation;
+        p.transform.SetParent(null);
+        p.Initialize(projectilePool, projectileSpeed, projectileDamage);
     }
 }

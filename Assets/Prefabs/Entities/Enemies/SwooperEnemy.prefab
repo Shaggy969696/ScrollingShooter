@@ -214,7 +214,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SwooperEnemy
   maxHealth: 100
   flashDuration: 0.1
-  swoopSpeed: 12
+  swoopSpeed: 20
   curveWidth: 22
   curveZOffset: 18
   contactDamage: 20

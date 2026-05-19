@@ -33,6 +33,7 @@ Transform:
   m_Children:
   - {fileID: 7919647458916737676}
   - {fileID: 2309680308507065521}
+  - {fileID: 5698887916359754220}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2870152705070913152
@@ -51,7 +52,10 @@ MonoBehaviour:
   flashDuration: 0.1
   moveSpeed: 10
   distanceFromTopBorder: 5
-  fireInterval: 1.5
+  fireInterval: 0.8
+  projectileDamage: 10
+  projectileSpeed: 20
+  projectilePool: {fileID: 4394783294898449763}
   firePoint: {fileID: 2309680308507065521}
 --- !u!54 &-59650117004629462
 Rigidbody:
@@ -223,3 +227,49 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &5669030470847173737
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5698887916359754220}
+  - component: {fileID: 4394783294898449763}
+  m_Layer: 6
+  m_Name: EnemyProjectilePool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5698887916359754220
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5669030470847173737}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6389097634876682427}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4394783294898449763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5669030470847173737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae59807de5210d54cab5ee7c730ed364, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectilePool
+  prefab: {fileID: 3338083005864400785, guid: 5fff0efe63608604cb05f388cb2f4df9, type: 3}
+  initialSize: 50

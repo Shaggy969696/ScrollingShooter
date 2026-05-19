@@ -249,6 +249,8 @@ MonoBehaviour:
   halfHeight: 36.5
   spawnMargin: 12
   maxActiveShooters: 3
+  playerTransform: {fileID: 0}
+  swooperMaxXFactor: 0.85
 --- !u!114 &170797271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -262,6 +264,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawnerTester
   spawner: {fileID: 170797270}
+  shooterInterval: 5
+  shooterLanes:
+  - -10
+  - 0
+  - 10
+  swooperInterval: 4
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -831,6 +839,47 @@ MonoBehaviour:
   - {fileID: 921019673}
   - {fileID: 921019672}
   - {fileID: 921019671}
+--- !u!114 &921019675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 921019666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5312bac07fee63d4f8a2742e083a829f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerEntity
+  maxHealth: 100
+  flashDuration: 0.12
+--- !u!54 &921019676
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 921019666}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &928979563
 GameObject:
   m_ObjectHideFlags: 0
@@ -1480,6 +1529,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5447739304639395556, guid: 931eef4494b0d0840bd980af58ccde47, type: 3}
       insertIndex: -1
       addedObject: {fileID: 921019671}
+    - targetCorrespondingSourceObject: {fileID: 5447739304639395556, guid: 931eef4494b0d0840bd980af58ccde47, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 921019675}
+    - targetCorrespondingSourceObject: {fileID: 5447739304639395556, guid: 931eef4494b0d0840bd980af58ccde47, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 921019676}
   m_SourcePrefab: {fileID: 100100000, guid: 931eef4494b0d0840bd980af58ccde47, type: 3}
 --- !u!1 &2022154962
 GameObject:
