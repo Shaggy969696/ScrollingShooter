@@ -13,6 +13,7 @@
 //   El Renderer se busca automáticamente en hijos.
 // ============================================================
 
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -26,6 +27,10 @@ public class PlayerEntity : Entity
     private Color     originalColor;
     private Coroutine flashCoroutine;
 
+    // ── Evento para la UI ─────────────────────────────────────────────────────
+    // Parámetros: (currentHealth, maxHealth)
+    public event Action<float, float> OnHealthChanged;
+
     protected override void Awake()
     {
         base.Awake();
@@ -36,11 +41,18 @@ public class PlayerEntity : Entity
             Debug.LogWarning($"{gameObject.name}: no se encontró Renderer para el flash del player.");
     }
 
+    private void Start()
+    {
+        // Notifica la UI con los valores iniciales al arrancar
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
     // ── Daño / Flash ──────────────────────────────────────────────────────────
 
     protected override void OnDamageTaken(float amount)
     {
         Debug.Log($"[Player] Recibió {amount} de daño. HP: {currentHealth}/{maxHealth}");
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
         if (flashCoroutine != null)
             StopCoroutine(flashCoroutine);
@@ -51,7 +63,6 @@ public class PlayerEntity : Entity
     private IEnumerator FlashWhite()
     {
         if (playerRenderer == null) yield break;
-
         playerRenderer.material.color = Color.white;
         yield return new WaitForSeconds(flashDuration);
         playerRenderer.material.color = originalColor;
@@ -63,7 +74,8 @@ public class PlayerEntity : Entity
     protected override void Die()
     {
         Debug.Log("[Player] Game Over.");
-        // TODO: pantalla de Game Over, detener juego, etc.
+        OnHealthChanged?.Invoke(0f, maxHealth);
+        // TODO: pantalla de Game Over
         gameObject.SetActive(false);
     }
 }

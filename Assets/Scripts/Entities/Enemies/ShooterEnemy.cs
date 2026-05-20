@@ -1,7 +1,7 @@
 // ============================================================
 // ShooterEnemy.cs
-// MODIFICADO: Shoot() ahora obtiene un proyectil del pool enemigo
-// y lo lanza desde el firePoint hacia el player (-Z).
+// MODIFICADO: el enemigo se retira automáticamente tras stayDuration
+// segundos en estado Shooting si no es destruido antes por el player.
 // ============================================================
 
 using UnityEngine;
@@ -19,6 +19,12 @@ public class ShooterEnemy : Enemy
     [Tooltip("Segundos entre disparos")]
     [SerializeField] private float fireInterval = 1.5f;
 
+    [Tooltip("Mínimo delay antes del primer disparo al llegar a posición (0 = dispara enseguida)")]
+    [SerializeField] private float firstShotMinDelay = 0.1f;
+
+    [Tooltip("Máximo delay antes del primer disparo al llegar a posición (≤ fireInterval)")]
+    [SerializeField] private float firstShotMaxDelay = 1.4f;
+
     [Tooltip("Daño que inflige cada proyectil al player")]
     [SerializeField] private float projectileDamage = 10f;
 
@@ -31,6 +37,10 @@ public class ShooterEnemy : Enemy
     [Tooltip("Punto de origen del disparo — debe apuntar hacia -Z en world space")]
     [SerializeField] private Transform firePoint;
 
+    [Header("Shooter - Tiempo en escena")]
+    [Tooltip("Segundos que permanece disparando antes de retirarse solo (0 = no se retira)")]
+    [SerializeField] private float stayDuration = 8f;
+
     // ── Estado interno ────────────────────────────────────────────────────────
 
     private enum State { Idle, Entering, Shooting, Retreating }
@@ -39,6 +49,7 @@ public class ShooterEnemy : Enemy
     private float stopAtZ;
     private float retreatToZ;
     private float fireTimer;
+    private float stayTimer;    // cuenta regresiva desde stayDuration
 
     // ── API pública ───────────────────────────────────────────────────────────
 
@@ -48,7 +59,6 @@ public class ShooterEnemy : Enemy
         stopAtZ    = topBorderZ - distanceFromTopBorder;
         retreatToZ = spawnPos.z;
         state      = State.Entering;
-        // fireTimer se resetea al llegar a stopAtZ, en UpdateEntering()
     }
 
     public void Retreat()
@@ -63,6 +73,7 @@ public class ShooterEnemy : Enemy
     {
         state     = State.Idle;
         fireTimer = 0f;
+        stayTimer = 0f;
     }
 
     // ── Unity ─────────────────────────────────────────────────────────────────
@@ -87,18 +98,28 @@ public class ShooterEnemy : Enemy
         if (Mathf.Abs(transform.position.z - stopAtZ) < 0.05f)
         {
             transform.position = target;
-            fireTimer = fireInterval; // ← resetea aquí, no en BeginEntry
-            state = State.Shooting;
+            fireTimer = fireInterval;
+            stayTimer = stayDuration;   // arranca la cuenta regresiva al detenerse
+            state     = State.Shooting;
         }
     }
 
     private void UpdateShooting()
     {
+        // ── Disparo ───────────────────────────────────────────────────────────
         fireTimer -= Time.deltaTime;
         if (fireTimer <= 0f)
         {
             Shoot();
             fireTimer = fireInterval;
+        }
+
+        // ── Retirada automática ───────────────────────────────────────────────
+        if (stayDuration > 0f)
+        {
+            stayTimer -= Time.deltaTime;
+            if (stayTimer <= 0f)
+                Retreat();
         }
     }
 
@@ -110,6 +131,8 @@ public class ShooterEnemy : Enemy
         if (transform.position.z >= retreatToZ - 0.05f)
             ReturnToPool();
     }
+
+    // ── Disparo ───────────────────────────────────────────────────────────────
 
     private void Shoot()
     {

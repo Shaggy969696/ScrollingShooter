@@ -25,6 +25,7 @@
 //   weapons[2] → LaserWeapon component del Player
 // ============================================================
 
+using System;
 using UnityEngine;
 
 public class WeaponController : MonoBehaviour
@@ -35,6 +36,10 @@ public class WeaponController : MonoBehaviour
     private int currentIndex = 0;
     private Weapon activeWeapon;
     private bool isFiring;
+
+    // ── Evento para la UI ─────────────────────────────────────────────────────
+    // Parámetro: nombre del tipo del arma equipada (ej. "NormalShot")
+    public event Action<string> OnWeaponChanged;
 
     private void Start()
     {
@@ -48,8 +53,6 @@ public class WeaponController : MonoBehaviour
 
     private void Update()
     {
-        // Solo las armas Auto se disparan cada frame (la cadencia la controla el cooldown del arma)
-        // SinglePulse (Laser) se dispara directamente en OnFirePressed(), no aquí
         if (isFiring && activeWeapon != null && activeWeapon.fireMode == Weapon.FireMode.Auto)
             activeWeapon.TryFire();
     }
@@ -65,28 +68,22 @@ public class WeaponController : MonoBehaviour
     }
 
     // Llamado por PlayerController cuando se SUELTA el botón de disparo
-    public void OnFireReleased()
-    {
-        isFiring = false;
-    }
+    public void OnFireReleased() => isFiring = false;
 
     // Avanza al siguiente arma en el array (cíclico)
-    public void SwitchNext()
-    {
-        EquipWeapon((currentIndex + 1) % weapons.Length);
-    }
+    public void SwitchNext() => EquipWeapon((currentIndex + 1) % weapons.Length);
 
     // Retrocede al arma anterior (cíclico)
-    public void SwitchPrevious()
-    {
-        EquipWeapon((currentIndex - 1 + weapons.Length) % weapons.Length);
-    }
+    public void SwitchPrevious() => EquipWeapon((currentIndex - 1 + weapons.Length) % weapons.Length);
 
     private void EquipWeapon(int index)
     {
         currentIndex = index;
         activeWeapon = weapons[currentIndex];
-        isFiring = false;  // resetea el estado de disparo al cambiar arma
-        Debug.Log($"Arma equipada: {activeWeapon.GetType().Name}");
+        isFiring     = false;  // resetea el estado de disparo al cambiar arma
+
+        string weaponName = activeWeapon.GetType().Name;
+        Debug.Log($"Arma equipada: {weaponName}");
+        OnWeaponChanged?.Invoke(weaponName);
     }
 }

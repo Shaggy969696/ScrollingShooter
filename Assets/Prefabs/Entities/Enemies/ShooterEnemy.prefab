@@ -48,15 +48,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75eb8e19e90099b469ddae3a350323b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShooterEnemy
-  maxHealth: 100
+  maxHealth: 150
   flashDuration: 0.1
+  scoreValue: 100
   moveSpeed: 10
   distanceFromTopBorder: 5
-  fireInterval: 0.8
+  fireInterval: 1
+  firstShotMinDelay: 0.5
+  firstShotMaxDelay: 1.5
   projectileDamage: 10
-  projectileSpeed: 20
+  projectileSpeed: 15
   projectilePool: {fileID: 4394783294898449763}
   firePoint: {fileID: 2309680308507065521}
+  stayDuration: 8
 --- !u!54 &-59650117004629462
 Rigidbody:
   m_ObjectHideFlags: 0

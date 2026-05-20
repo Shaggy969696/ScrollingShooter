@@ -1,10 +1,8 @@
 // ============================================================
 // Enemy.cs
-// MODIFICADO: soporte para Object Pool.
-//   - Initialize(pool) : restablece vida y llama al hook OnSpawn()
-//   - ReturnToPool()   : limpia flash y devuelve al pool (Destroy si no hay pool)
-//   - Die()            : ya no llama Destroy(), delega en ReturnToPool()
-//   - OnSpawn()        : hook virtual para que las subclases reinicien estado
+// MODIFICADO: Die() suma el puntaje al ScoreManager antes de
+// volver al pool. scoreValue se define por inspector en cada
+// prefab (ShooterEnemy y SwooperEnemy tienen valores distintos).
 // ============================================================
 
 using System.Collections;
@@ -16,11 +14,13 @@ public class Enemy : Entity
     [Tooltip("Duración del flash blanco en segundos")]
     [SerializeField] private float flashDuration = 0.1f;
 
-    private Renderer   enemyRenderer;
-    private Color      originalColor;
-    private Coroutine  flashCoroutine;
+    [Header("Puntaje")]
+    [Tooltip("Puntos que otorga este enemigo al ser destruido por el player")]
+    [SerializeField] private int scoreValue = 100;
 
-    // Pool que gestiona este enemigo (asignado por EnemySpawner al activarlo)
+    private Renderer  enemyRenderer;
+    private Color     originalColor;
+    private Coroutine flashCoroutine;
     private EnemyPool originPool;
 
     protected override void Awake()
@@ -33,10 +33,6 @@ public class Enemy : Entity
             Debug.LogWarning($"{gameObject.name}: no se encontró Renderer para el flash.");
     }
 
-    // ── API pública ───────────────────────────────────────────────────────────
-
-    // Llamado por EnemySpawner tras sacar este enemigo del pool.
-    // Restablece la vida y notifica a la subclase para que reinicie su estado.
     public void Initialize(EnemyPool pool)
     {
         originPool    = pool;
@@ -44,26 +40,22 @@ public class Enemy : Entity
         OnSpawn();
     }
 
-    // ── Hooks ─────────────────────────────────────────────────────────────────
-
-    // Las subclases reinician sus variables de estado aquí.
-    // Se llama desde Initialize(), ANTES de que el spawner fije posición/ruta.
     protected virtual void OnSpawn() { }
 
     protected override void Die()
     {
-        Debug.Log($"{gameObject.name} destruido!");
-        // TODO: efecto de explosión, sumar score, etc.
+        Debug.Log($"{gameObject.name} destruido! +{scoreValue} puntos.");
+
+        if (ScoreManager.Instance != null)
+            ScoreManager.Instance.Add(scoreValue);
+        else
+            Debug.LogWarning("[Enemy] ScoreManager no encontrado en la escena.");
+
         ReturnToPool();
     }
 
-    // ── Pool ──────────────────────────────────────────────────────────────────
-
-    // Cancela el flash y devuelve el enemigo al pool (o lo destruye como fallback).
-    // Accesible desde subclases (ej. SwooperEnemy al impactar sin morir).
     protected void ReturnToPool()
     {
-        // Limpiar flash para no dejar el material atascado en blanco
         if (flashCoroutine != null)
         {
             StopCoroutine(flashCoroutine);
@@ -75,10 +67,8 @@ public class Enemy : Entity
         if (originPool != null)
             originPool.ReturnEnemy(this);
         else
-            Destroy(gameObject);  // fallback: enemigo colocado en escena sin pool
+            Destroy(gameObject);
     }
-
-    // ── Daño / Flash ──────────────────────────────────────────────────────────
 
     protected override void OnDamageTaken(float amount)
     {
@@ -93,7 +83,6 @@ public class Enemy : Entity
     private IEnumerator FlashWhite()
     {
         if (enemyRenderer == null) yield break;
-
         enemyRenderer.material.color = Color.white;
         yield return new WaitForSeconds(flashDuration);
         enemyRenderer.material.color = originalColor;

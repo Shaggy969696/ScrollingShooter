@@ -20,6 +20,10 @@ public abstract class Entity : MonoBehaviour, IDamageable
     // Estado interno de la salud - solo las subclases pueden leer/modificar
     protected float currentHealth;
 
+    // ── Propiedades públicas para UI ──────────────────────────────────────────
+    public float CurrentHealth => currentHealth;
+    public float MaxHealth     => maxHealth;
+
     // Implementación de IDamageable.IsDead
     public bool IsDead => currentHealth <= 0f;
 
